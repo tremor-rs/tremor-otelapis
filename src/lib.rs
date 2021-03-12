@@ -124,6 +124,14 @@
 //! [`otelapis`]: https://github.com/open-telemetry/opentelemetry-specification
 //! [`tonic-build`]: https://github.com/hyperium/tonic/tree/master/tonic-build
 
+#![forbid(warnings)]
+#![deny(
+    clippy::all,
+    clippy::unwrap_used,
+    clippy::unnecessary_unwrap,
+    // clippy::pedantic
+)]
+
 #[allow(unused_macros)]
 macro_rules! include_proto {
     ($package: tt) => {
@@ -132,6 +140,7 @@ macro_rules! include_proto {
 }
 
 include!("otelapis.rs");
+
 
 #[cfg(feature = "otel-trace")]
 /// This module defines a skeleton implementation of the open telemetry
@@ -146,33 +155,38 @@ pub mod trace {
         const NAME: &'static str = "opentelemetry.proto.collector.trace.v1.TraceService";
     }
 
-    pub type TraceRequest = tonic::Request<base::ExportTraceServiceRequest>;
-    pub type TraceResponse = tonic::Response<base::ExportTraceServiceResponse>;
+    /// Alias tonic TraceRequest
+    pub type OtelTraceRequest = tonic::Request<base::ExportTraceServiceRequest>;
 
+    /// Alias tonic TraceResponse
+    pub type OtelTraceResponse = tonic::Response<base::ExportTraceServiceResponse>;
+
+    /// Alias the generated server skeletons
     pub use skel::TraceServiceServer;
 
+    /// Alias trace callback fn
     pub type OnTraceFn =
-        dyn Fn(TraceRequest) -> Result<TraceResponse, tonic::Status> + Send + Sync + 'static;
+        dyn Fn(OtelTraceRequest) -> Result<OtelTraceResponse, tonic::Status> + Send + Sync + 'static;
 
     /// GRPC trace service skeleton
-    pub struct TraceService {
+    pub struct OtelTraceService {
         on_trace: Box<OnTraceFn>,
     }
 
-    impl TraceService {
+    impl OtelTraceService {
         /// Creates a trace service with the specified trace event handler function
         pub fn with_handler(handler: Box<OnTraceFn>) -> Self {
-            TraceService { on_trace: handler }
+            OtelTraceService { on_trace: handler }
         }
     }
 
     /// Creates a tonic service handler for open telemetry trace events
-    pub fn make_service(handler: Box<OnTraceFn>) -> skel::TraceServiceServer<TraceService> {
-        skel::TraceServiceServer::new(TraceService::with_handler(handler))
+    pub fn make_service(handler: Box<OnTraceFn>) -> skel::TraceServiceServer<OtelTraceService> {
+        skel::TraceServiceServer::new(OtelTraceService::with_handler(handler))
     }
 
     #[tonic::async_trait]
-    impl skel::TraceService for TraceService {
+    impl skel::TraceService for OtelTraceService {
         async fn export(
             &self,
             request: tonic::Request<base::ExportTraceServiceRequest>,
@@ -196,29 +210,36 @@ pub mod logs {
         const NAME: &'static str = "opentelemetry.proto.collector.logs.v1.LogsService";
     }
 
-    pub type LogsRequest = tonic::Request<base::ExportLogsServiceRequest>;
-    pub type LogsResponse = tonic::Response<base::ExportLogsServiceResponse>;
+    /// Alias tonic request
+    pub type OtelLogsRequest = tonic::Request<base::ExportLogsServiceRequest>;
 
+    /// Alias tonic reponse
+    pub type OtelLogsResponse = tonic::Response<base::ExportLogsServiceResponse>;
+
+    /// Alias service skeleton
     pub use skel::LogsService;
+
+    /// Alias logs server
     pub use skel::LogsServiceServer;
 
+    /// Alias logs callback fn
     pub type OnLogsFn =
-        dyn Fn(LogsRequest) -> Result<LogsResponse, tonic::Status> + Send + Sync + 'static;
+        dyn Fn(OtelLogsRequest) -> Result<OtelLogsResponse, tonic::Status> + Send + Sync + 'static;
 
     /// GRPC logs service skeleton
-    pub struct LogsServiceHandler {
+    pub struct OtelLogsService {
         on_logs: Box<OnLogsFn>,
     }
 
-    impl LogsServiceHandler {
+    impl OtelLogsService {
         /// Creates a logs service with the specified logs event handler function
         pub fn with_handler(handler: Box<OnLogsFn>) -> Self {
-            LogsServiceHandler { on_logs: handler }
+            OtelLogsService { on_logs: handler }
         }
     }
 
     #[tonic::async_trait]
-    impl skel::LogsService for LogsServiceHandler {
+    impl skel::LogsService for OtelLogsService {
         async fn export(
             &self,
             request: tonic::Request<base::ExportLogsServiceRequest>,
@@ -228,31 +249,33 @@ pub mod logs {
     }
 
     /// Creates a tonic service handler for open telemetry log events
-    pub fn make_service(handler: Box<OnLogsFn>) -> skel::LogsServiceServer<LogsServiceHandler> {
-        skel::LogsServiceServer::new(LogsServiceHandler::with_handler(handler))
+    pub fn make_service(handler: Box<OnLogsFn>) -> skel::LogsServiceServer<OtelLogsService> {
+        skel::LogsServiceServer::new(OtelLogsService::with_handler(handler))
     }
 
-    // Asynchronous channel sender
-    pub type LogsSender = Sender<base::ExportLogsServiceRequest>;
+    /// Asynchronous channel sender
+    pub type OtelLogsSender = Sender<base::ExportLogsServiceRequest>;
 
-    // Asynchronous channel receiver
-    pub type LogsReceiver = Receiver<base::ExportLogsServiceRequest>;
+    /// Asynchronous channel receiver
+    pub type OtelLogsReceiver = Receiver<base::ExportLogsServiceRequest>;
 
-    pub struct LogsServiceForwarder {
+    /// Logs forwarding agent
+    pub struct OtelLogsServiceForwarder {
         channel: Sender<base::ExportLogsServiceRequest>,
     }
 
     // Creates a metrics service with the specified asynchronous sender channel
-    impl LogsServiceForwarder {
+    impl OtelLogsServiceForwarder {
+        /// Creates a log forwarding agent with an asynchronous channel sender
         pub fn with_sender(channel: Sender<base::ExportLogsServiceRequest>) -> Self {
-            LogsServiceForwarder {
-                channel: channel.clone(),
+            OtelLogsServiceForwarder {
+                channel,
             }
         }
     }
 
     #[tonic::async_trait]
-    impl skel::LogsService for LogsServiceForwarder {
+    impl skel::LogsService for OtelLogsServiceForwarder {
         async fn export(
             &self,
             request: tonic::Request<base::ExportLogsServiceRequest>,
@@ -268,8 +291,8 @@ pub mod logs {
     }
 
     /// Creates a tonic service handler for open telemetry logs events
-    pub fn make_forwarder(sender: LogsSender) -> skel::LogsServiceServer<LogsServiceForwarder> {
-        skel::LogsServiceServer::new(LogsServiceForwarder::with_sender(sender))
+    pub fn make_forwarder(sender: OtelLogsSender) -> skel::LogsServiceServer<OtelLogsServiceForwarder> {
+        skel::LogsServiceServer::new(OtelLogsServiceForwarder::with_sender(sender))
     }
 }
 
@@ -290,28 +313,32 @@ pub mod metrics {
         const NAME: &'static str = "opentelemetry.proto.collector.metrics.v1.MetricsService";
     }
 
-    pub type MetricsRequest = tonic::Request<base::ExportMetricsServiceRequest>;
-    pub type MetricsResponse = tonic::Response<base::ExportMetricsServiceResponse>;
+    /// Alias tonic request
+    pub type OtelMetricsRequest = tonic::Request<base::ExportMetricsServiceRequest>;
 
+    /// Alias tonic response
+    pub type OtelMetricsResponse = tonic::Response<base::ExportMetricsServiceResponse>;
+
+    /// Alias metrics callback fn
     pub type OnMetricsFn =
-        dyn Fn(MetricsRequest) -> Result<MetricsResponse, tonic::Status> + Send + Sync + 'static;
+        dyn Fn(OtelMetricsRequest) -> Result<OtelMetricsResponse, tonic::Status> + Send + Sync + 'static;
 
     /// GRPC metrics service skeleton
-    pub struct MetricsServiceHandler {
+    pub struct OtelMetricsService {
         on_metrics: Box<OnMetricsFn>,
     }
 
-    impl MetricsServiceHandler {
+    impl OtelMetricsService {
         /// Creates a metrics service with the specified metrics event handler function
         pub fn with_handler(handler: Box<OnMetricsFn>) -> Self {
-            MetricsServiceHandler {
+            OtelMetricsService {
                 on_metrics: handler,
             }
         }
     }
 
     #[tonic::async_trait]
-    impl skel::MetricsService for MetricsServiceHandler {
+    impl skel::MetricsService for OtelMetricsService {
         async fn export(
             &self,
             request: tonic::Request<base::ExportMetricsServiceRequest>,
@@ -323,31 +350,32 @@ pub mod metrics {
     /// Creates a tonic service handler for open telemetry metrics events
     pub fn make_service(
         handler: Box<OnMetricsFn>,
-    ) -> skel::MetricsServiceServer<MetricsServiceHandler> {
-        skel::MetricsServiceServer::new(MetricsServiceHandler::with_handler(handler))
+    ) -> skel::MetricsServiceServer<OtelMetricsService> {
+        skel::MetricsServiceServer::new(OtelMetricsService::with_handler(handler))
     }
 
-    // Asynchronous channel sender
-    pub type MetricsSender = Sender<base::ExportMetricsServiceRequest>;
+    /// Asynchronous channel sender
+    pub type OtelMetricsSender = Sender<base::ExportMetricsServiceRequest>;
 
-    // Asynchronous channel receiver
-    pub type MetricsReceiver = Receiver<base::ExportMetricsServiceRequest>;
+    /// Asynchronous channel receiver
+    pub type OtelMetricsReceiver = Receiver<base::ExportMetricsServiceRequest>;
 
-    // Creates a metrics service with the specified asynchronous sender channel
-    pub struct MetricsServiceForwarder {
+    /// Creates a metrics service with the specified asynchronous sender channel
+    pub struct OtelMetricsServiceForwarder {
         channel: Sender<base::ExportMetricsServiceRequest>,
     }
 
-    impl MetricsServiceForwarder {
+    impl OtelMetricsServiceForwarder {
+        /// Creates a metrics service forwarding agent with an asynchronous channel sender
         pub fn with_sender(channel: Sender<base::ExportMetricsServiceRequest>) -> Self {
-            MetricsServiceForwarder {
-                channel: channel.clone(),
+            OtelMetricsServiceForwarder {
+                channel,
             }
         }
     }
 
     #[tonic::async_trait]
-    impl skel::MetricsService for MetricsServiceForwarder {
+    impl skel::MetricsService for OtelMetricsServiceForwarder {
         async fn export(
             &self,
             request: tonic::Request<base::ExportMetricsServiceRequest>,
@@ -364,12 +392,13 @@ pub mod metrics {
 
     /// Creates a tonic service forwarder for open telemetry metrics events
     pub fn make_forwarder(
-        sender: MetricsSender,
-    ) -> skel::MetricsServiceServer<MetricsServiceForwarder> {
-        skel::MetricsServiceServer::new(MetricsServiceForwarder::with_sender(sender))
+        sender: OtelMetricsSender,
+    ) -> skel::MetricsServiceServer<OtelMetricsServiceForwarder> {
+        skel::MetricsServiceServer::new(OtelMetricsServiceForwarder::with_sender(sender))
     }
 }
 
+/// A unified set of services that provide log, metrics and trace events
 #[cfg(feature = "otel-all")]
 pub mod all {
     use crate::opentelemetry::proto::collector::logs::v1 as logs_base;
@@ -379,25 +408,32 @@ pub mod all {
     use std::net::SocketAddr;
     use tonic::transport::Server;
 
+    /// Enumeration of protocol buffer messages that are sendable/receivable
     pub enum OpenTelemetryEvents {
+        /// A logs export request
         Logs(logs_base::ExportLogsServiceRequest),
+        /// A metrics export request
         Metrics(metrics_base::ExportMetricsServiceRequest),
+        /// A trace export request
         Trace(trace_base::ExportTraceServiceRequest),
     }
 
+    /// Alias receiver
     pub type OpenTelemetrySender = Sender<OpenTelemetryEvents>;
 
+    /// Alias sender
     pub type OpenTelemetryReceiver = Receiver<OpenTelemetryEvents>;
 
-    // Creates a logs service with the specified asynchronous sender channel
+    /// Creates a logs service with the specified asynchronous sender channel
     pub struct LogsServiceForwarder {
         channel: Sender<OpenTelemetryEvents>,
     }
 
     impl LogsServiceForwarder {
+        /// Creates a logs service forwarding agent
         pub fn with_sender(channel: Sender<OpenTelemetryEvents>) -> Self {
             LogsServiceForwarder {
-                channel: channel.clone(),
+                channel,
             }
         }
     }
@@ -424,15 +460,16 @@ pub mod all {
         }
     }
 
-    // Creates a metrics service with the specified asynchronous sender channel
+    /// Creates a metrics service with the specified asynchronous sender channel
     pub struct MetricsServiceForwarder {
         channel: Sender<OpenTelemetryEvents>,
     }
 
     impl MetricsServiceForwarder {
+        /// Creates a metrics service forwarding agent
         pub fn with_sender(channel: Sender<OpenTelemetryEvents>) -> Self {
             MetricsServiceForwarder {
-                channel: channel.clone(),
+                channel,
             }
         }
     }
@@ -460,15 +497,16 @@ pub mod all {
         }
     }
 
-    // Creates a trace service with the specified asynchronous sender channel
+    /// Creates a trace service with the specified asynchronous sender channel
     pub struct TraceServiceForwarder {
         channel: Sender<OpenTelemetryEvents>,
     }
 
     impl TraceServiceForwarder {
+        /// Creates a trace service forwarding agent
         pub fn with_sender(channel: Sender<OpenTelemetryEvents>) -> Self {
             TraceServiceForwarder {
-                channel: channel.clone(),
+                channel,
             }
         }
     }
@@ -496,6 +534,7 @@ pub mod all {
         }
     }
 
+    /// Spins up a `gRPC OpenTelemetry Collector` instance
     pub async fn make(
         addr: SocketAddr,
         sender: Sender<OpenTelemetryEvents>,

@@ -12,6 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// We allow the generated code to use a less strict coding still
+// than hand maintained code.
+#[cfg_attr(
+    feature = "cargo-clippy",
+    allow(
+        clippy::all,
+        clippy::unwrap_used,
+        clippy::unnecessary_unwrap,
+        clippy::pedantic,
+    )
+)]
 pub mod opentelemetry {
     pub mod proto {
         pub mod collector {
