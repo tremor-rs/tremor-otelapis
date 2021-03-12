@@ -18,6 +18,8 @@ jobs:
   unused-deps:
     runs-on: ubuntu-latest
     steps:
+      - name: Update deps
+        run: sudo apt-get update -y
       - name: Install deps
         run: sudo snap install remarshal
       - name: Install deps

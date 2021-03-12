@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+      - name: Update deps
+        run: sudo apt-get update -y
       - name: Install deps [Linux]
         run: sudo apt-get install -y libssl1.0-dev libssl1.0
       - uses: actions-rs/toolchain@v1
@@ -19,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+      - name: Update deps
+        run: sudo apt-get update -y
       - name: Install deps
         run: sudo apt-get install -y libssl1.0-dev libssl1.0
       - uses: actions-rs/toolchain@v1
