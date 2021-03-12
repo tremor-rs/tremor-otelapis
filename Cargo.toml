@@ -1,6 +1,6 @@
 [package]
 name = "tremor-otelapis"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["The Tremor Team"]
 description = "OpenTelemetry v1 API binding based on tonic/prost."
 edition = "2018"
