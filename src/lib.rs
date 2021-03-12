@@ -141,7 +141,6 @@ macro_rules! include_proto {
 
 include!("otelapis.rs");
 
-
 #[cfg(feature = "otel-trace")]
 /// This module defines a skeleton implementation of the open telemetry
 /// collector tracing service
@@ -165,8 +164,10 @@ pub mod trace {
     pub use skel::TraceServiceServer;
 
     /// Alias trace callback fn
-    pub type OnTraceFn =
-        dyn Fn(OtelTraceRequest) -> Result<OtelTraceResponse, tonic::Status> + Send + Sync + 'static;
+    pub type OnTraceFn = dyn Fn(OtelTraceRequest) -> Result<OtelTraceResponse, tonic::Status>
+        + Send
+        + Sync
+        + 'static;
 
     /// GRPC trace service skeleton
     pub struct OtelTraceService {
@@ -268,9 +269,7 @@ pub mod logs {
     impl OtelLogsServiceForwarder {
         /// Creates a log forwarding agent with an asynchronous channel sender
         pub fn with_sender(channel: Sender<base::ExportLogsServiceRequest>) -> Self {
-            OtelLogsServiceForwarder {
-                channel,
-            }
+            OtelLogsServiceForwarder { channel }
         }
     }
 
@@ -291,7 +290,9 @@ pub mod logs {
     }
 
     /// Creates a tonic service handler for open telemetry logs events
-    pub fn make_forwarder(sender: OtelLogsSender) -> skel::LogsServiceServer<OtelLogsServiceForwarder> {
+    pub fn make_forwarder(
+        sender: OtelLogsSender,
+    ) -> skel::LogsServiceServer<OtelLogsServiceForwarder> {
         skel::LogsServiceServer::new(OtelLogsServiceForwarder::with_sender(sender))
     }
 }
@@ -320,8 +321,10 @@ pub mod metrics {
     pub type OtelMetricsResponse = tonic::Response<base::ExportMetricsServiceResponse>;
 
     /// Alias metrics callback fn
-    pub type OnMetricsFn =
-        dyn Fn(OtelMetricsRequest) -> Result<OtelMetricsResponse, tonic::Status> + Send + Sync + 'static;
+    pub type OnMetricsFn = dyn Fn(OtelMetricsRequest) -> Result<OtelMetricsResponse, tonic::Status>
+        + Send
+        + Sync
+        + 'static;
 
     /// GRPC metrics service skeleton
     pub struct OtelMetricsService {
@@ -368,9 +371,7 @@ pub mod metrics {
     impl OtelMetricsServiceForwarder {
         /// Creates a metrics service forwarding agent with an asynchronous channel sender
         pub fn with_sender(channel: Sender<base::ExportMetricsServiceRequest>) -> Self {
-            OtelMetricsServiceForwarder {
-                channel,
-            }
+            OtelMetricsServiceForwarder { channel }
         }
     }
 
@@ -432,9 +433,7 @@ pub mod all {
     impl LogsServiceForwarder {
         /// Creates a logs service forwarding agent
         pub fn with_sender(channel: Sender<OpenTelemetryEvents>) -> Self {
-            LogsServiceForwarder {
-                channel,
-            }
+            LogsServiceForwarder { channel }
         }
     }
 
@@ -468,9 +467,7 @@ pub mod all {
     impl MetricsServiceForwarder {
         /// Creates a metrics service forwarding agent
         pub fn with_sender(channel: Sender<OpenTelemetryEvents>) -> Self {
-            MetricsServiceForwarder {
-                channel,
-            }
+            MetricsServiceForwarder { channel }
         }
     }
 
@@ -505,9 +502,7 @@ pub mod all {
     impl TraceServiceForwarder {
         /// Creates a trace service forwarding agent
         pub fn with_sender(channel: Sender<OpenTelemetryEvents>) -> Self {
-            TraceServiceForwarder {
-                channel,
-            }
+            TraceServiceForwarder { channel }
         }
     }
 
