@@ -22,7 +22,8 @@ EOF
 
 
 
-files=$(find . -name '*.rs' | grep -v -f .checkignore)
+# Constrain to `src` and ignore `gen` which is generated code by `prost`
+files=$(find src -name '*.rs' | grep -v -f .checkignore)
 
 while getopts hauiprebldxc opt; do
     case $opt in
