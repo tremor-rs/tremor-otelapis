@@ -399,16 +399,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "prost-types"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b518d7cdd93dab1d1122cf07fa9a60771836c668dde9d9e2a139f957f0d9f1bb"
-dependencies = [
- "bytes",
- "prost",
-]
-
-[[package]]
 name = "quote"
 version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -646,7 +636,6 @@ version = "0.1.0"
 dependencies = [
  "async-channel",
  "prost",
- "prost-types",
  "tonic",
 ]
 
