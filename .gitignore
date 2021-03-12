@@ -1,0 +1,10 @@
+.DS_Store
+/target*
+*/target*
+local-examples
+.#*
+secrets
+log
+*~
+temp/
+.gitconfig
