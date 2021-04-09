@@ -1,0 +1,4 @@
+[submodule "opentelemetry-proto"]
+	path = opentelemetry-proto
+	url = git@github.com:open-telemetry/opentelemetry-proto
+#	branch = 0.8 As `opentelemetry-collector` currently tracks `main`, so does tremor 
