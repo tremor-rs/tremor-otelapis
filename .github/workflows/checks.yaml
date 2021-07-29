@@ -51,6 +51,8 @@ jobs:
           override: true
           profile: minimal
           components: clippy
+      - name: Buikd
+        run: cargo build
       - uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

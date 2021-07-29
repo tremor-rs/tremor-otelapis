@@ -140,14 +140,10 @@
     // clippy::pedantic - this makes the generated code unhappy
 )]
 
-#[allow(unused_macros)]
-macro_rules! include_proto {
-    ($package: tt) => {
-        include!(concat!("../gen", concat!("/", $package, ".rs")));
-    };
-}
+extern crate prost;
 
-include!("otelapis.rs");
+mod otelapis;
+pub use otelapis::opentelemetry;
 
 #[cfg(feature = "otel-trace")]
 /// This module defines a skeleton implementation of the open telemetry
@@ -156,11 +152,6 @@ include!("otelapis.rs");
 pub mod trace {
     use crate::opentelemetry::proto::collector::trace::v1 as base;
     use crate::opentelemetry::proto::collector::trace::v1::trace_service_server as skel;
-
-    impl<S: skel::TraceService> tonic::transport::NamedService for skel::TraceServiceServer<S> {
-        // NOTE This name *MUST* match the proto fqsn
-        const NAME: &'static str = "opentelemetry.proto.collector.trace.v1.TraceService";
-    }
 
     /// Alias tonic TraceRequest
     pub type OtelTraceRequest = tonic::Request<base::ExportTraceServiceRequest>;
@@ -213,11 +204,6 @@ pub mod logs {
     use crate::opentelemetry::proto::collector::logs::v1 as base;
     use crate::opentelemetry::proto::collector::logs::v1::logs_service_server as skel;
     use async_channel::{Receiver, Sender};
-
-    impl<S: skel::LogsService> tonic::transport::NamedService for skel::LogsServiceServer<S> {
-        // NOTE This name *MUST* match the proto fqsn
-        const NAME: &'static str = "opentelemetry.proto.collector.logs.v1.LogsService";
-    }
 
     /// Alias tonic request
     pub type OtelLogsRequest = tonic::Request<base::ExportLogsServiceRequest>;
@@ -316,11 +302,6 @@ pub mod metrics {
 
     pub use skel::MetricsService;
     pub use skel::MetricsServiceServer;
-
-    impl<S: skel::MetricsService> tonic::transport::NamedService for skel::MetricsServiceServer<S> {
-        // NOTE This name *MUST* match the proto fqsn
-        const NAME: &'static str = "opentelemetry.proto.collector.metrics.v1.MetricsService";
-    }
 
     /// Alias tonic request
     pub type OtelMetricsRequest = tonic::Request<base::ExportMetricsServiceRequest>;
