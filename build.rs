@@ -1,14 +1,4 @@
-use std::process::Command;
-
 fn main() {
-    Command::new("git")
-        .args(&["submodule", "init"])
-        .output()
-        .expect("failed to execute submodule init");
-    Command::new("git")
-        .args(&["submodule", "update"])
-        .output()
-        .expect("failed to execute submodule update");
     tonic_build::configure()
     .build_client(true)
     .build_server(true)
