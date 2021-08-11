@@ -10,7 +10,7 @@ license = "Apache-2.0"
 name = "tremor-otelapis"
 readme = "README.md"
 repository = "https://github.com/tremor-rs/tremor-otelapis"
-version = "0.2.0"
+version = "0.2.1"
 
 [lib]
 doctest = false
@@ -86,9 +86,8 @@ otel-trace = [
 
 [dependencies]
 prost = { version = "0.8" }
-tonic = { version = "0.5" }
-#prost-types = { version = "0.7" }
+tonic = { version = "0.5.2" }
 async-channel = "1"
 
 [build-dependencies]
-tonic-build = { version = "0.5" }
+tonic-build = { version = "0.5.2" }
