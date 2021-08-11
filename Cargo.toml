@@ -10,7 +10,7 @@ license = "Apache-2.0"
 name = "tremor-otelapis"
 readme = "README.md"
 repository = "https://github.com/tremor-rs/tremor-otelapis"
-version = "0.2.1"
+version = "0.2.2"
 
 [lib]
 doctest = false
