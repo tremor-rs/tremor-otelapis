@@ -401,11 +401,32 @@ pub mod all {
     /// Enumeration of protocol buffer messages that are sendable/receivable
     pub enum OpenTelemetryEvents {
         /// A logs export request
-        Logs(logs_base::ExportLogsServiceRequest),
+        Logs(logs_base::ExportLogsServiceRequest, Option<SocketAddr>),
         /// A metrics export request
-        Metrics(metrics_base::ExportMetricsServiceRequest),
+        Metrics(
+            metrics_base::ExportMetricsServiceRequest,
+            Option<SocketAddr>,
+        ),
         /// A trace export request
-        Trace(trace_base::ExportTraceServiceRequest),
+        Trace(trace_base::ExportTraceServiceRequest, Option<SocketAddr>),
+    }
+    impl From<tonic::Request<logs_base::ExportLogsServiceRequest>> for OpenTelemetryEvents {
+        fn from(req: tonic::Request<logs_base::ExportLogsServiceRequest>) -> Self {
+            let remote = req.remote_addr();
+            Self::Logs(req.into_inner(), remote)
+        }
+    }
+    impl From<tonic::Request<metrics_base::ExportMetricsServiceRequest>> for OpenTelemetryEvents {
+        fn from(req: tonic::Request<metrics_base::ExportMetricsServiceRequest>) -> Self {
+            let remote = req.remote_addr();
+            Self::Metrics(req.into_inner(), remote)
+        }
+    }
+    impl From<tonic::Request<trace_base::ExportTraceServiceRequest>> for OpenTelemetryEvents {
+        fn from(req: tonic::Request<trace_base::ExportTraceServiceRequest>) -> Self {
+            let remote = req.remote_addr();
+            Self::Trace(req.into_inner(), remote)
+        }
     }
 
     /// Alias receiver
@@ -432,11 +453,7 @@ pub mod all {
             &self,
             request: tonic::Request<logs_base::ExportLogsServiceRequest>,
         ) -> Result<tonic::Response<logs_base::ExportLogsServiceResponse>, tonic::Status> {
-            match self
-                .channel
-                .send(OpenTelemetryEvents::Logs(request.into_inner()))
-                .await
-            {
+            match self.channel.send(OpenTelemetryEvents::from(request)).await {
                 Ok(_) => Ok(tonic::Response::new(
                     logs_base::ExportLogsServiceResponse {},
                 )),
@@ -467,11 +484,7 @@ pub mod all {
             request: tonic::Request<metrics_base::ExportMetricsServiceRequest>,
         ) -> Result<tonic::Response<metrics_base::ExportMetricsServiceResponse>, tonic::Status>
         {
-            match self
-                .channel
-                .send(OpenTelemetryEvents::Metrics(request.into_inner()))
-                .await
-            {
+            match self.channel.send(OpenTelemetryEvents::from(request)).await {
                 Ok(_) => Ok(tonic::Response::new(
                     metrics_base::ExportMetricsServiceResponse {},
                 )),
@@ -502,11 +515,7 @@ pub mod all {
             request: tonic::Request<trace_base::ExportTraceServiceRequest>,
         ) -> Result<tonic::Response<trace_base::ExportTraceServiceResponse>, tonic::Status>
         {
-            match self
-                .channel
-                .send(OpenTelemetryEvents::Trace(request.into_inner()))
-                .await
-            {
+            match self.channel.send(OpenTelemetryEvents::from(request)).await {
                 Ok(_) => Ok(tonic::Response::new(
                     trace_base::ExportTraceServiceResponse {},
                 )),
