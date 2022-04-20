@@ -132,7 +132,7 @@
 //! [`tonic-build`]: https://github.com/hyperium/tonic/tree/master/tonic-build
 //!
 
-#![forbid(warnings)]
+#![deny(warnings)] // this cannot be `forbid`, because the generated code uses `allow`
 #![deny(
     clippy::all,
     clippy::unwrap_used,
