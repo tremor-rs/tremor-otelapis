@@ -137,6 +137,7 @@
     clippy::all,
     clippy::unwrap_used,
     clippy::unnecessary_unwrap,
+    missing_docs
     // clippy::pedantic - this makes the generated code unhappy
 )]
 

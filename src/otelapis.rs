@@ -23,29 +23,42 @@
         clippy::pedantic,
     )
 )]
+#[allow(missing_docs)]
+
+/// Opentelemetry APIs
 pub mod opentelemetry {
+    /// Protocols
     pub mod proto {
+        /// Colector
         pub mod collector {
+            /// Logs
             pub mod logs {
+                /// v1
                 pub mod v1 {
                     #[cfg(any(feature = "opentelemetry-proto-collector-logs-v1",))]
                     tonic::include_proto!("opentelemetry.proto.collector.logs.v1");
                 }
             }
+            /// Metrics
             pub mod metrics {
+                /// v1
                 pub mod v1 {
                     #[cfg(any(feature = "opentelemetry-proto-collector-metrics-v1",))]
                     tonic::include_proto!("opentelemetry.proto.collector.metrics.v1");
                 }
             }
+            /// Traces
             pub mod trace {
+                /// v1
                 pub mod v1 {
                     #[cfg(any(feature = "opentelemetry-proto-collector-trace-v1",))]
                     tonic::include_proto!("opentelemetry.proto.collector.trace.v1");
                 }
             }
         }
+        /// Common definitions
         pub mod common {
+            /// v1
             pub mod v1 {
                 #[cfg(any(
                     feature = "opentelemetry-proto-collector-logs-v1",
@@ -61,7 +74,9 @@ pub mod opentelemetry {
                 tonic::include_proto!("opentelemetry.proto.common.v1");
             }
         }
+        /// Logs
         pub mod logs {
+            /// v1
             pub mod v1 {
                 #[cfg(any(
                     feature = "opentelemetry-proto-collector-logs-v1",
@@ -70,11 +85,14 @@ pub mod opentelemetry {
                 tonic::include_proto!("opentelemetry.proto.logs.v1");
             }
         }
+        /// Metrics
         pub mod metrics {
+            /// experimental
             pub mod experimental {
                 #[cfg(any(feature = "opentelemetry-proto-metrics-experimental",))]
                 tonic::include_proto!("opentelemetry.proto.metrics.experimental");
             }
+            /// v1
             pub mod v1 {
                 #[cfg(any(
                     feature = "opentelemetry-proto-collector-metrics-v1",
@@ -83,7 +101,9 @@ pub mod opentelemetry {
                 tonic::include_proto!("opentelemetry.proto.metrics.v1");
             }
         }
+        /// resourices
         pub mod resource {
+            /// v1
             pub mod v1 {
                 #[cfg(any(
                     feature = "opentelemetry-proto-collector-logs-v1",
@@ -98,7 +118,9 @@ pub mod opentelemetry {
                 tonic::include_proto!("opentelemetry.proto.resource.v1");
             }
         }
+        /// traces
         pub mod trace {
+            /// v1
             pub mod v1 {
                 #[cfg(any(
                     feature = "opentelemetry-proto-collector-trace-v1",
