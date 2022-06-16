@@ -50,9 +50,6 @@ jobs:
         with:
           override: true
           profile: minimal
-          components:
-            - clippy
-            - rustfmt
       - name: Buikd
         run: cargo build
       - uses: actions-rs/clippy-check@v1
