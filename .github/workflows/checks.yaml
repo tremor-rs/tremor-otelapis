@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v1
       - name: Check license headers
         run: ./.github/checks/copyright.sh
-  sanity:
+  safety:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -37,7 +37,6 @@ jobs:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
         with:
-          override: true
           profile: minimal
           components: rustfmt
       - name: Check Formating
@@ -46,16 +45,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Update deps
-        run: sudo apt-get update -y
+      - uses: Swatinem/rust-cache@v1
       - name: Install deps
-        run: sudo apt-get install -y libssl-dev libssl1.0
+        run: sudo apt-get -qy update && sudo apt-get install -y libssl-dev libssl1.1
       - uses: actions-rs/toolchain@v1
         with:
-          override: true
           profile: minimal
-      - name: Buikd
-        run: cargo build
+          components: clippy
+      - name: Check workflow permissions
+        id: check_permissions
+        uses: scherermichael-oss/action-has-permission@1.0.6
+        with:
+          required-permission: write
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run clippy action to produce annotations
         uses: actions-rs/clippy-check@v1
         if: steps.check_permissions.outputs.has-permission
@@ -65,4 +68,3 @@ jobs:
       - name: Run clippy manually without annotations
         if: ${{ !steps.check_permissions.outputs.has-permission }}
         run: cargo clippy --all
-

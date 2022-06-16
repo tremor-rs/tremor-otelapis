@@ -2,9 +2,9 @@
 
 count=0
 
-for file in $(find src -name '*.rs' | grep -v '/target')
+for file in $(find . -name '*.rs' | grep -v '/target')
 do
-    if ! grep 'Copyright 2020-2021, The Tremor Team' "$file" > /dev/null
+    if ! grep 'Copyright \(....-\)\?202[12], The Tremor Team' "$file" > /dev/null
     then
         echo "##[error] Copyright missing in $file"
         count=$((count + 1))
