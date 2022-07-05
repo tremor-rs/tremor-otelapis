@@ -19,5 +19,6 @@ jobs:
         with:
           override: true
           profile: minimal
+          toolchain: stable
       - name: Run tests
         run: cargo test --all
