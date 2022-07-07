@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+* Upgrade to opentelemetry-proto specs v1.8.0
+* include opentelemetry-proto via git submodule
+
 ## 0.1
 
 * Initial version
