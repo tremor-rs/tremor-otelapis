@@ -29,7 +29,6 @@ opentelemetry-proto-collector-metrics-v1 = []
 opentelemetry-proto-collector-trace-v1 = []
 opentelemetry-proto-common-v1 = []
 opentelemetry-proto-logs-v1 = []
-opentelemetry-proto-metrics-experimental = []
 opentelemetry-proto-metrics-v1 = []
 opentelemetry-proto-resource-v1 = []
 opentelemetry-proto-trace-v1 = []
@@ -41,7 +40,6 @@ otel-gen = [
     "opentelemetry-proto-logs-v1",
     "opentelemetry-proto-collector-logs-v1",
     "opentelemetry-proto-metrics-v1",
-    "opentelemetry-proto-metrics-experimental",
     "opentelemetry-proto-trace-v1",
     "opentelemetry-proto-collector-metrics-v1",
     "opentelemetry-proto-collector-trace-v1",
@@ -56,7 +54,6 @@ otel-all = [
     "opentelemetry-proto-logs-v1",
     "opentelemetry-proto-collector-logs-v1",
     "opentelemetry-proto-metrics-v1",
-    "opentelemetry-proto-metrics-experimental",
     "opentelemetry-proto-trace-v1",
     "opentelemetry-proto-collector-metrics-v1",
     "opentelemetry-proto-collector-trace-v1",
@@ -73,7 +70,6 @@ otel-metrics = [
     "opentelemetry-proto-resource-v1",
     "opentelemetry-proto-common-v1",
     "opentelemetry-proto-metrics-v1",
-    "opentelemetry-proto-metrics-experimental",
     "opentelemetry-proto-collector-metrics-v1",
 ]
 

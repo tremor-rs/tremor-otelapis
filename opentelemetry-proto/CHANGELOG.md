@@ -1,15 +1,14 @@
 # Changelog
 
-
 ## Unreleased
 
-Full list of differences found in [this compare.](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.9.0...v0.10.0)
+Full list of differences found in [this compare](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.18.0...main).
 
 ### Maturity
 
 * Remove if no changes for this section before release.
 
-### Changed: Metrics
+### Changed
 
 * Remove if no changes for this section before release.
 
@@ -20,6 +19,110 @@ Full list of differences found in [this compare.](https://github.com/open-teleme
 ### Removed
 
 * Remove if no changes for this section before release.
+
+## 0.18.0 - 2022-05-11
+
+Full list of differences found in [this compare](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.17.0...v0.18.0).
+
+### Changed
+
+* Declare logs Stable.
+  [(#376)](https://github.com/open-telemetry/opentelemetry-proto/pull/376)
+* Metrics ExponentialHistogramDataPoint makes the `sum` optional
+  (follows the same change in HistogramDataPOint in 0.15). [#392](https://github.com/open-telemetry/opentelemetry-proto/pull/392)
+
+## 0.17.0 - 2022-05-06
+
+Full list of differences found in [this compare](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.16.0...v0.17.0).
+
+### Changed
+
+* Introduce optional `min` and `max` fields to the Histogram and ExponentialHistogram data points.
+  [(#279)](https://github.com/open-telemetry/opentelemetry-proto/pull/279)
+
+## 0.16.0 - 2022-03-31
+
+Full list of differences found in [this compare](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.15.0...v0.16.0).
+
+### Removed
+
+* Remove deprecated LogRecord.Name field (#373).
+
+## 0.15.0 - 2022-03-19
+
+Full list of differences found in [this compare](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.14.0...v0.15.0).
+
+### Changed
+
+* Rename InstrumentationLibrary to InstrumentationScope (#362)
+
+### Added
+
+* Use optional for `sum` field to mark presence (#366)
+
+## 0.14.0 - 2022-03-08
+
+Full list of differences found in [this compare](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.13.0...v0.14.0).
+
+### Removed
+
+* Deprecate LogRecord.Name field (#357)
+
+## 0.13.0 - 2022-02-10
+
+Full list of differences found in [this compare](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.12.0...v0.13.0).
+
+### Changed
+
+* `Swagger` generation updated to `openapiv2` due to the use of an updated version of protoc in `otel/build-protobuf`
+* Clarify attribute key uniqueness requirement (#350)
+* Fix path to Go packages (#360)
+
+### Added
+
+* Add ObservedTimestamp to LogRecord. (#351)
+* Add native kotlin support (#337)
+
+### Removed
+
+* Remove unused deprecated message StringKeyValue (#358)
+* Remove experimental metrics config service (#359)
+ 
+## 0.12.0 - 2022-01-19
+
+Full list of differences found in [this compare](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.11.0...v0.12.0).
+
+### Changed
+
+* Rename logs to log_records in InstrumentationLibraryLogs. (#352)
+
+### Removed
+
+* Remove deprecated messages and fields from traces. (#341)
+* Remove deprecated messages and fields from metrics. (#342)
+
+## 0.11.0 - 2021-10-07
+
+Full list of differences found in [this compare](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.10.0...v0.11.0).
+
+### Added
+
+* ExponentialHistogram is a base-2 exponential histogram described in [OTEP 149](https://github.com/open-telemetry/oteps/pull/149). (#322)
+* Adds `TracesData`, `MetricsData`, and `LogsData` container types for common use
+  in transporting multiple `ResourceSpans`, `ResourceMetrics`, and `ResourceLogs`. (#332)
+
+## 0.10.0 - 2021-09-07
+
+Full list of differences found in [this compare.](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.9.0...v0.10.0)
+
+### Maturity
+
+* `collector/logs/*` is now considered `Beta`. (#311)
+* `logs/*` is now considered `Beta`. (#311)
+
+### Added
+
+* Metrics data points add a `flags` field with one bit to represent explicitly missing data. (#316)
 
 ## 0.9.0 - 2021-04-12
 
@@ -48,6 +151,24 @@ Full list of differences found in [this compare.](https://github.com/open-teleme
 ## 0.8.0 - 2021-03-23
 
 Full list of differences found in [this compare.](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.7.0...v0.8.0)
+
+### Historical breaking change notice
+
+Release 0.8 was the last in the line of releases marked as "unstable".
+This release broke compatibility in more ways than were recognized and
+documented at the time of its release.  In particular, #278 created
+the `NumberDataPoint` type and used it in several locations in place
+of the former `DoubleDataPoint`.  The new `oneof` in `NumberDataPoint`
+re-used the former `DoubleDataPoint` tag number, which means that
+pre-0.8 `DoubleSum` and `DoubleGauge` points would parse correctly as
+a 0.8 `Sum` and `Gauge` points containing double-valued numbers.
+
+However, by virtue of a `syntax = "proto3"` declaration, the protocol
+compiler for all versions of OTLP have not included field presence,
+which means 0 values are not serialized.  **The result is that valid
+OTLP 0.7 `DoubleSum` and `DoubleGauge` points would not parse
+correctly as OTLP 0.8 data.**  Instead, they parse as
+`NumberDataPoint` with a missing value in the `oneof` field.
 
 ### Changed: Metrics
 

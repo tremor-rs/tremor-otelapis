@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+* Upgrade to [opentelemetry-proto specs version 0.18.0](https://github.com/open-telemetry/opentelemetry-proto/releases/tag/v0.18.0)
+
 ## 0.1
 
 * Initial version

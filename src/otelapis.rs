@@ -66,7 +66,6 @@ pub mod opentelemetry {
                     feature = "opentelemetry-proto-collector-trace-v1",
                     feature = "opentelemetry-proto-common-v1",
                     feature = "opentelemetry-proto-logs-v1",
-                    feature = "opentelemetry-proto-metrics-experimental",
                     feature = "opentelemetry-proto-metrics-v1",
                     feature = "opentelemetry-proto-resource-v1",
                     feature = "opentelemetry-proto-trace-v1",
@@ -87,11 +86,6 @@ pub mod opentelemetry {
         }
         /// Metrics
         pub mod metrics {
-            /// experimental
-            pub mod experimental {
-                #[cfg(any(feature = "opentelemetry-proto-metrics-experimental",))]
-                tonic::include_proto!("opentelemetry.proto.metrics.experimental");
-            }
             /// v1
             pub mod v1 {
                 #[cfg(any(
@@ -110,7 +104,6 @@ pub mod opentelemetry {
                     feature = "opentelemetry-proto-collector-metrics-v1",
                     feature = "opentelemetry-proto-collector-trace-v1",
                     feature = "opentelemetry-proto-logs-v1",
-                    feature = "opentelemetry-proto-metrics-experimental",
                     feature = "opentelemetry-proto-metrics-v1",
                     feature = "opentelemetry-proto-resource-v1",
                     feature = "opentelemetry-proto-trace-v1",
