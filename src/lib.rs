@@ -174,7 +174,7 @@ pub mod common {
                     disposition.rejected_log_records,
                     0,
                     0,
-                    disposition.error_message.clone(),
+                    disposition.error_message,
                 ),
                 None => Self::new(0, 0, 0, String::new()),
             }
@@ -188,7 +188,7 @@ pub mod common {
                     0,
                     disposition.rejected_data_points,
                     0,
-                    disposition.error_message.clone(),
+                    disposition.error_message,
                 ),
                 None => Self::new(0, 0, 0, String::new()),
             }
@@ -202,7 +202,7 @@ pub mod common {
                     0,
                     0,
                     disposition.rejected_spans,
-                    disposition.error_message.clone(),
+                    disposition.error_message,
                 ),
                 None => Self::new(0, 0, 0, String::new()),
             }
