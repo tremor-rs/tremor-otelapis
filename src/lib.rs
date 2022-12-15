@@ -250,7 +250,7 @@ pub mod logs {
                 Ok(()) => Ok(tonic::Response::new(base::ExportLogsServiceResponse {
                     partial_success: Some(base::ExportLogsPartialSuccess {
                         rejected_log_records: 0,
-                        error_message: "snot".to_string(),
+                        error_message: "Ok".to_string(),
                     }),
                 })),
                 Err(e) => Err(tonic::Status::internal(&format!(
@@ -352,7 +352,7 @@ pub mod metrics {
                 Ok(_) => Ok(tonic::Response::new(base::ExportMetricsServiceResponse {
                     partial_success: Some(base::ExportMetricsPartialSuccess {
                         rejected_data_points: 0,
-                        error_message: "snot".to_string(),
+                        error_message: "Ok".to_string(),
                     }),
                 })),
                 Err(e) => Err(tonic::Status::internal(&format!(
@@ -440,7 +440,7 @@ pub mod all {
                 Ok(_) => Ok(tonic::Response::new(logs_base::ExportLogsServiceResponse {
                     partial_success: Some(logs_base::ExportLogsPartialSuccess {
                         rejected_log_records: 0,
-                        error_message: "snot".to_string(),
+                        error_message: "Ok".to_string(),
                     }),
                 })),
                 Err(e) => Err(tonic::Status::internal(&format!(
