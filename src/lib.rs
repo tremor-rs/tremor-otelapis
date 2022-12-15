@@ -198,12 +198,9 @@ pub mod common {
     impl From<ExportTraceServiceResponse> for FallibleOtelResponse {
         fn from(response: ExportTraceServiceResponse) -> Self {
             match response.partial_success {
-                Some(disposition) => Self::new(
-                    0,
-                    0,
-                    disposition.rejected_spans,
-                    disposition.error_message,
-                ),
+                Some(disposition) => {
+                    Self::new(0, 0, disposition.rejected_spans, disposition.error_message)
+                }
                 None => Self::new(0, 0, 0, String::new()),
             }
         }
