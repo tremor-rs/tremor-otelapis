@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-Full list of differences found in [this compare](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.18.0...main).
+Full list of differences found in [this compare](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.19.0...main).
 
 ### Maturity
 
@@ -20,7 +20,28 @@ Full list of differences found in [this compare](https://github.com/open-telemet
 
 * Remove if no changes for this section before release.
 
-## 0.18.0 - 2022-05-11
+## 0.19.0 - 2022-08-03
+
+Full list of differences found in [this compare](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.18.0...v0.19.0).
+
+### Changed
+
+* Add `csharp_namespace` option to protos.
+  ([#399](https://github.com/open-telemetry/opentelemetry-proto/pull/399))
+* Fix some out-of-date urls which link to [specification](https://github.com/open-telemetry/opentelemetry-specification). ([#402](https://github.com/open-telemetry/opentelemetry-proto/pull/402))
+* :stop_sign: [BREAKING] Delete deprecated InstrumentationLibrary, 
+  InstrumentationLibraryLogs, InstrumentationLibrarySpans and
+  InstrumentationLibraryMetrics messages. Delete deprecated
+  instrumentation_library_logs, instrumentation_library_spans and
+  instrumentation_library_metrics fields.
+
+### Added
+
+* Introduce Scope Attributes. [#395](https://github.com/open-telemetry/opentelemetry-proto/pull/395)
+* Introduce partial success fields in `Export<signal>ServiceResponse`.
+ [#414](https://github.com/open-telemetry/opentelemetry-proto/pull/414)
+
+## 0.18.0 - 2022-05-17
 
 Full list of differences found in [this compare](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.17.0...v0.18.0).
 

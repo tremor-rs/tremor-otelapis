@@ -27,7 +27,10 @@
 
 ## Status
 
-Exprimental - this library is a work in progress under active development
+This library exists to support OpenTelemetry based connectivity within tremor.
+
+Tremor can expose client and server OpenTelemetry endpoints based on the gRPC
+protocol specification for OpenTelemetry.
 
 ## About
 

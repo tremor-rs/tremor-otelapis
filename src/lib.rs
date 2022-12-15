@@ -40,9 +40,9 @@
 //! ```toml
 //! [dependencies]
 //! tremor-otelapis = { version = "0.1", features = ["otel-all"] }
-//! tonic = { version = "0.4", features = ["tls"] }
-//! prost = "0.7"
-//! prost-types = "0.7"
+//! tonic = { version = "0.8.2", features = ["tls"] }
+//! prost = "0.11"
+//! prost-types = "0.11"
 //! tokio = { version = "1.1", features = ["rt-multi-thread", "time", "fs", "macros"] }
 //! ```
 //!
@@ -96,38 +96,6 @@
 //!     Ok(())
 //! }
 //!
-//! ```
-//!
-//! Example async-channel based OpenTelemetry for ease of integration with
-//! async runtimes such as [tremor](https://www.tremor.rs):
-//!
-//! ```ignore
-//! #[tokio::main]
-//! async fn main() -> Result<(), Box<dyn std::error::Error>> {
-//!     let addr = "0.0.0.0:4317".parse()?;
-//!     let (tx, rx) = bounded(128);
-//!     tremor_otelapis::all::make(addr, tx).await?;
-//!
-//!     // ...
-//!
-//!     loop {
-//!         match rx.try_recv() {
-//!             Ok(OpenTelemetryEvents::Metrics(metrics)) => {
-//!                 // Do something with metrics request
-//!             }
-//!             Ok(OpenTelemetryEvents::Logs(log)) => {
-//!                 // Do something with log request
-//!             }
-//!             Ok(OpenTelemetryEvents::Trace(trace)) => {
-//!                 // Do something with trace request
-//!             }
-//!             _ => error!("Unsupported"),
-//!         };
-//!    }
-//!
-//!    // ...
-//! }
-//!
 //! [`otelapis`]: https://github.com/open-telemetry/opentelemetry-specification
 //! [`tonic-build`]: https://github.com/hyperium/tonic/tree/master/tonic-build
 //!
@@ -145,6 +113,102 @@ extern crate prost;
 
 mod otelapis;
 pub use otelapis::opentelemetry;
+
+/// This modules defines the OpenTelemetry gRPC service definitions introduced
+/// in v0.19 which make Otel gRPC responses fallible and transporting error context
+/// back to the requestor. In prior versions of Otel, the gRPC responses contained
+/// no error context and were always successful.
+///
+/// The change from infallible to fallible is a major breaking change forcing implementors
+/// to course correct their handlers to return errors. This module standardises this handling
+/// and provides a simple way to handle the error context in a uniform way as far as use in
+/// tremor is concerned.
+///
+pub mod common {
+    use crate::opentelemetry::proto::collector::{
+        logs::v1::ExportLogsServiceResponse, metrics::v1::ExportMetricsServiceResponse,
+        trace::v1::ExportTraceServiceResponse,
+    };
+
+    /// Prior to v0.19, responses were infallible. Since v0.19, they propagate error context.
+    /// This struct is a convenience wrapper to make handling the error context easier to
+    /// integrate with tremor.
+    pub struct FallibleOtelResponse {
+        /// Possibly non-zero Count of rejected log records
+        pub rejected_logs: i64,
+        /// Possibly non-zero count of rejected metrics records
+        pub rejected_metrics: i64,
+        /// Possibly non-zero count of rejected trace records
+        pub rejected_spans: i64,
+        /// Possibly empty error message
+        pub error_message: String,
+    }
+
+    impl FallibleOtelResponse {
+        /// Create a new FallibleOtelResponse
+        pub fn new(
+            rejected_logs: i64,
+            rejected_metrics: i64,
+            rejected_spans: i64,
+            error_message: String,
+        ) -> Self {
+            Self {
+                rejected_logs,
+                rejected_metrics,
+                rejected_spans,
+                error_message,
+            }
+        }
+
+        /// Checks if errors were reported in the response - if any rejected count is non-zero this will return false
+        /// The error message is not included in this check
+        pub fn is_ok(&self) -> bool {
+            self.rejected_logs == 0 && self.rejected_metrics == 0 && self.rejected_spans == 0
+        }
+    }
+
+    impl From<ExportLogsServiceResponse> for FallibleOtelResponse {
+        fn from(response: ExportLogsServiceResponse) -> Self {
+            match response.partial_success {
+                Some(disposition) => Self::new(
+                    disposition.rejected_log_records,
+                    0,
+                    0,
+                    disposition.error_message.clone(),
+                ),
+                None => Self::new(0, 0, 0, String::new()),
+            }
+        }
+    }
+
+    impl From<ExportMetricsServiceResponse> for FallibleOtelResponse {
+        fn from(response: ExportMetricsServiceResponse) -> Self {
+            match response.partial_success {
+                Some(disposition) => Self::new(
+                    0,
+                    disposition.rejected_data_points,
+                    0,
+                    disposition.error_message.clone(),
+                ),
+                None => Self::new(0, 0, 0, String::new()),
+            }
+        }
+    }
+
+    impl From<ExportTraceServiceResponse> for FallibleOtelResponse {
+        fn from(response: ExportTraceServiceResponse) -> Self {
+            match response.partial_success {
+                Some(disposition) => Self::new(
+                    0,
+                    0,
+                    disposition.rejected_spans,
+                    disposition.error_message.clone(),
+                ),
+                None => Self::new(0, 0, 0, String::new()),
+            }
+        }
+    }
+}
 
 #[cfg(feature = "otel-trace")]
 /// This module defines a skeleton implementation of the open telemetry
@@ -275,7 +339,12 @@ pub mod logs {
             request: tonic::Request<base::ExportLogsServiceRequest>,
         ) -> Result<tonic::Response<base::ExportLogsServiceResponse>, tonic::Status> {
             match self.channel.send(request.into_inner()).await {
-                Ok(_) => Ok(tonic::Response::new(base::ExportLogsServiceResponse {})),
+                Ok(()) => Ok(tonic::Response::new(base::ExportLogsServiceResponse {
+                    partial_success: Some(base::ExportLogsPartialSuccess {
+                        rejected_log_records: 0,
+                        error_message: "snot".to_string(),
+                    }),
+                })),
                 Err(e) => Err(tonic::Status::internal(&format!(
                     "Logs gRPC forwarder channel sender failed to dispatch {}",
                     e
@@ -372,7 +441,12 @@ pub mod metrics {
             request: tonic::Request<base::ExportMetricsServiceRequest>,
         ) -> Result<tonic::Response<base::ExportMetricsServiceResponse>, tonic::Status> {
             match self.channel.send(request.into_inner()).await {
-                Ok(_) => Ok(tonic::Response::new(base::ExportMetricsServiceResponse {})),
+                Ok(_) => Ok(tonic::Response::new(base::ExportMetricsServiceResponse {
+                    partial_success: Some(base::ExportMetricsPartialSuccess {
+                        rejected_data_points: 0,
+                        error_message: "snot".to_string(),
+                    }),
+                })),
                 Err(e) => Err(tonic::Status::internal(&format!(
                     "Metrics gRPC forwarder channel sender failed to dispatch {}",
                     e
@@ -397,7 +471,7 @@ pub mod all {
     use crate::opentelemetry::proto::collector::trace::v1 as trace_base;
     use async_channel::{Receiver, Sender};
     use std::net::SocketAddr;
-    use tonic::transport::Server;
+    //    use tonic::transport::Server;
 
     /// Enumeration of protocol buffer messages that are sendable/receivable
     pub enum OpenTelemetryEvents {
@@ -455,9 +529,12 @@ pub mod all {
             request: tonic::Request<logs_base::ExportLogsServiceRequest>,
         ) -> Result<tonic::Response<logs_base::ExportLogsServiceResponse>, tonic::Status> {
             match self.channel.send(OpenTelemetryEvents::from(request)).await {
-                Ok(_) => Ok(tonic::Response::new(
-                    logs_base::ExportLogsServiceResponse {},
-                )),
+                Ok(_) => Ok(tonic::Response::new(logs_base::ExportLogsServiceResponse {
+                    partial_success: Some(logs_base::ExportLogsPartialSuccess {
+                        rejected_log_records: 0,
+                        error_message: "snot".to_string(),
+                    }),
+                })),
                 Err(e) => Err(tonic::Status::internal(&format!(
                     "Logs gRPC forwarder channel sender failed to dispatch {}",
                     e
@@ -487,7 +564,12 @@ pub mod all {
         {
             match self.channel.send(OpenTelemetryEvents::from(request)).await {
                 Ok(_) => Ok(tonic::Response::new(
-                    metrics_base::ExportMetricsServiceResponse {},
+                    metrics_base::ExportMetricsServiceResponse {
+                        partial_success: Some(metrics_base::ExportMetricsPartialSuccess {
+                            rejected_data_points: 0,
+                            error_message: "snot".to_string(),
+                        }),
+                    },
                 )),
                 Err(e) => Err(tonic::Status::internal(&format!(
                     "Metrics gRPC forwarder channel sender failed to dispatch {}",
@@ -518,7 +600,12 @@ pub mod all {
         {
             match self.channel.send(OpenTelemetryEvents::from(request)).await {
                 Ok(_) => Ok(tonic::Response::new(
-                    trace_base::ExportTraceServiceResponse {},
+                    trace_base::ExportTraceServiceResponse {
+                        partial_success: Some(trace_base::ExportTracePartialSuccess {
+                            rejected_spans: 0,
+                            error_message: "snot".to_string(),
+                        }),
+                    },
                 )),
                 Err(e) => Err(tonic::Status::internal(&format!(
                     "Trace gRPC forwarder channel sender failed to dispatch {}",
@@ -527,23 +614,84 @@ pub mod all {
             }
         }
     }
+}
 
-    /// Spins up a `gRPC OpenTelemetry Collector` instance
-    pub async fn make(
-        addr: SocketAddr,
-        sender: Sender<OpenTelemetryEvents>,
-    ) -> Result<(), tonic::transport::Error> {
-        Server::builder()
-            .add_service(super::trace::TraceServiceServer::new(
-                TraceServiceForwarder::with_sender(sender.clone()),
-            ))
-            .add_service(super::logs::LogsServiceServer::new(
-                LogsServiceForwarder::with_sender(sender.clone()),
-            ))
-            .add_service(super::metrics::MetricsServiceServer::new(
-                MetricsServiceForwarder::with_sender(sender),
-            ))
-            .serve(addr)
-            .await
+#[cfg(test)]
+mod test {
+    use crate::opentelemetry::proto::collector::{
+        logs::v1::{ExportLogsPartialSuccess, ExportLogsServiceResponse},
+        metrics::v1::{ExportMetricsPartialSuccess, ExportMetricsServiceResponse},
+        trace::v1::{ExportTracePartialSuccess, ExportTraceServiceResponse},
+    };
+
+    use super::common::FallibleOtelResponse;
+
+    #[test]
+    pub fn make_fallible_error() {
+        let mut e = FallibleOtelResponse::new(0, 0, 0, "snot".to_string());
+        assert_eq!(e.error_message, "snot".to_string());
+        assert_eq!(e.rejected_logs, 0);
+        assert_eq!(e.rejected_metrics, 0);
+        assert_eq!(e.rejected_spans, 0);
+        assert!(e.is_ok());
+        e.rejected_logs = 1;
+        assert!(!e.is_ok());
+        e.rejected_logs = -1;
+        assert!(!e.is_ok());
+        e.rejected_logs = 0;
+        e.rejected_metrics = 1;
+        assert!(!e.is_ok());
+        e.rejected_metrics = -1;
+        assert!(!e.is_ok());
+        e.rejected_metrics = 0;
+        e.rejected_spans = 1;
+        assert!(!e.is_ok());
+        e.rejected_spans = -1;
+        assert!(!e.is_ok());
+    }
+
+    #[test]
+    pub fn fallible_from_log_response() {
+        let log = ExportLogsServiceResponse {
+            partial_success: Some(ExportLogsPartialSuccess {
+                rejected_log_records: 1,
+                error_message: "beep".to_string(),
+            }),
+        };
+        let e = FallibleOtelResponse::from(log);
+        assert_eq!(e.error_message, "beep".to_string());
+        assert_eq!(e.rejected_logs, 1);
+        assert_eq!(e.rejected_metrics, 0);
+        assert_eq!(e.rejected_spans, 0);
+    }
+
+    #[test]
+    pub fn fallible_from_metric_response() {
+        let metric = ExportMetricsServiceResponse {
+            partial_success: Some(ExportMetricsPartialSuccess {
+                rejected_data_points: 1,
+                error_message: "boop".to_string(),
+            }),
+        };
+        let e = FallibleOtelResponse::from(metric);
+        assert_eq!(e.error_message, "boop".to_string());
+        assert_eq!(e.rejected_logs, 0);
+        assert_eq!(e.rejected_metrics, 1);
+        assert_eq!(e.rejected_spans, 0);
+    }
+
+    #[test]
+    pub fn fallible_from_trace_response() {
+        let metric = ExportTraceServiceResponse {
+            partial_success: Some(ExportTracePartialSuccess {
+                rejected_spans: 1,
+                error_message: "fleek".to_string(),
+            }),
+        };
+        let e = FallibleOtelResponse::from(metric);
+        assert_eq!(e.error_message, "fleek".to_string());
+        assert_eq!(e.rejected_logs, 0);
+        assert_eq!(e.rejected_metrics, 0);
+        assert_eq!(e.rejected_spans, 1);
     }
 }

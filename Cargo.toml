@@ -81,9 +81,9 @@ otel-trace = [
 ]
 
 [dependencies]
-prost = { version = "0.9" }
-tonic = { version = "0.6.2", features = ["compression"] }
+prost = { version = "0.11" }
+tonic = { version = "0.8.2", features = [ "gzip", "tls", "tls-webpki-roots" ] }
 async-channel = "1"
 
 [build-dependencies]
-tonic-build = { version = "0.6.2", features = ["compression"] }
+tonic-build = { version = "0.8.2" }
