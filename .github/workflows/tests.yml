@@ -14,7 +14,7 @@ jobs:
       - name: Update deps
         run: sudo apt-get update -y
       - name: Install deps [Linux]
-        run: sudo apt-get install -y libssl-dev libssl1.0
+        run: sudo apt-get install -y libssl-dev libssl1.0 protobuf-compiler
       - uses: actions-rs/toolchain@v1
         with:
           override: true
