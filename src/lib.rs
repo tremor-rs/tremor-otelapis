@@ -253,7 +253,7 @@ pub mod logs {
                         error_message: "Ok".to_string(),
                     }),
                 })),
-                Err(e) => Err(tonic::Status::internal(&format!(
+                Err(e) => Err(tonic::Status::internal(format!(
                     "Logs gRPC forwarder channel sender failed to dispatch {}",
                     e
                 ))),
@@ -355,7 +355,7 @@ pub mod metrics {
                         error_message: "Ok".to_string(),
                     }),
                 })),
-                Err(e) => Err(tonic::Status::internal(&format!(
+                Err(e) => Err(tonic::Status::internal(format!(
                     "Metrics gRPC forwarder channel sender failed to dispatch {}",
                     e
                 ))),
@@ -443,7 +443,7 @@ pub mod all {
                         error_message: "Ok".to_string(),
                     }),
                 })),
-                Err(e) => Err(tonic::Status::internal(&format!(
+                Err(e) => Err(tonic::Status::internal(format!(
                     "Logs gRPC forwarder channel sender failed to dispatch {}",
                     e
                 ))),
@@ -479,7 +479,7 @@ pub mod all {
                         }),
                     },
                 )),
-                Err(e) => Err(tonic::Status::internal(&format!(
+                Err(e) => Err(tonic::Status::internal(format!(
                     "Metrics gRPC forwarder channel sender failed to dispatch {}",
                     e
                 ))),
@@ -515,7 +515,7 @@ pub mod all {
                         }),
                     },
                 )),
-                Err(e) => Err(tonic::Status::internal(&format!(
+                Err(e) => Err(tonic::Status::internal(format!(
                     "Trace gRPC forwarder channel sender failed to dispatch {}",
                     e
                 ))),
