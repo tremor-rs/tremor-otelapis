@@ -2,23 +2,100 @@
 
 ## Unreleased
 
-Full list of differences found in [this compare](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.19.0...main).
+The full list of changes can be found in the compare view for the respective release at <https://github.com/open-telemetry/opentelemetry-proto/releases>.
 
-### Maturity
-
-* Remove if no changes for this section before release.
+## 1.3.2 - 2024-06-28
 
 ### Changed
 
-* Remove if no changes for this section before release.
+* profiles: add missing java_package option to pprofextended. [#558](https://github.com/open-telemetry/opentelemetry-proto/pull/558)
+
+## 1.3.1 - 2024-05-07
+
+### Changed
+
+* profiles: fix versioning in selector. [#551](https://github.com/open-telemetry/opentelemetry-proto/pull/551)
+
+## 1.3.0 - 2024-04-24
 
 ### Added
 
-* Remove if no changes for this section before release.
+* Add new profile signal.
+  [#534](https://github.com/open-telemetry/opentelemetry-proto/pull/534)
+
+## 1.2.0 - 2024-03-29
+
+### Added
+
+* Indicate if a `Span`'s parent or link is remote using 2 bit flag.
+  [#484](https://github.com/open-telemetry/opentelemetry-proto/pull/484)
+* Add metric.metadata for supporting additional metadata on metrics
+  [#514](https://github.com/open-telemetry/opentelemetry-proto/pull/514)
+* Add example of an Event [#538](https://github.com/open-telemetry/opentelemetry-proto/pull/538)
+
+### Changed
+
+## 1.1.0 - 2024-01-10
+
+Full list of differences found in [this compare](https://github.com/open-telemetry/opentelemetry-proto/compare/v1.0.0...v1.1.0).
+
+### Added
+
+* Add `flags` field to `Span` and `Span/Link` for W3C-specified Trace Context flags.
+  [#503](https://github.com/open-telemetry/opentelemetry-proto/pull/503)
+
+### Changed
+
+* Update and fix OTLP JSON examples. [#516](https://github.com/open-telemetry/opentelemetry-proto/pull/516),
+  [#510](https://github.com/open-telemetry/opentelemetry-proto/pull/510),
+  [#499](https://github.com/open-telemetry/opentelemetry-proto/pull/499)
+* Remove irrelevant comments from metric name field. [#512](https://github.com/open-telemetry/opentelemetry-proto/pull/512)
+* Add comment to explain schema_url fields. [#504](https://github.com/open-telemetry/opentelemetry-proto/pull/504)
+
+## 1.0.0 - 2023-07-03
+
+Full list of differences found in [this compare](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.20.0...v1.0.0).
+
+### Maturity
+
+* Add note about the possibility to have unstable components after 1.0.0
+  [#489](https://github.com/open-telemetry/opentelemetry-proto/pull/489)
+* Add maturity JSON entry per package
+  [#490](https://github.com/open-telemetry/opentelemetry-proto/pull/490)
+
+## 0.20.0 - 2023-06-06
+
+Full list of differences found in [this compare](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.19.0...v0.20.0).
+
+### Maturity
+
+* Declare OTLP/JSON Stable.
+  [#436](https://github.com/open-telemetry/opentelemetry-proto/pull/436)
+  [#435](https://github.com/open-telemetry/opentelemetry-proto/pull/435)
+* Provide stronger symbolic stability guarantees.
+  [#432](https://github.com/open-telemetry/opentelemetry-proto/pull/432)
+* Clarify how additive changes are handled.
+  [#455](https://github.com/open-telemetry/opentelemetry-proto/pull/455)
+
+### Changed
+
+* Change the exponential histogram boundary condition.
+  [#409](https://github.com/open-telemetry/opentelemetry-proto/pull/409)
+* Clarify behavior for empty/not present/invalid trace_id and span_id fields.
+  [#442](https://github.com/open-telemetry/opentelemetry-proto/pull/442)
+* Change the collector trace endpoint to /v1/traces.
+  [#449](https://github.com/open-telemetry/opentelemetry-proto/pull/449)
+
+### Added
+
+* Introduce `zero_threshold` field to `ExponentialHistogramDataPoint`.
+  [#441](https://github.com/open-telemetry/opentelemetry-proto/pull/441)
+  [#453](https://github.com/open-telemetry/opentelemetry-proto/pull/453)
 
 ### Removed
 
-* Remove if no changes for this section before release.
+* Delete requirement to generate new trace/span id if an invalid id is received.
+  [#444](https://github.com/open-telemetry/opentelemetry-proto/pull/444)
 
 ## 0.19.0 - 2022-08-03
 
@@ -29,7 +106,7 @@ Full list of differences found in [this compare](https://github.com/open-telemet
 * Add `csharp_namespace` option to protos.
   ([#399](https://github.com/open-telemetry/opentelemetry-proto/pull/399))
 * Fix some out-of-date urls which link to [specification](https://github.com/open-telemetry/opentelemetry-specification). ([#402](https://github.com/open-telemetry/opentelemetry-proto/pull/402))
-* :stop_sign: [BREAKING] Delete deprecated InstrumentationLibrary, 
+* :stop_sign: [BREAKING] Delete deprecated InstrumentationLibrary,
   InstrumentationLibraryLogs, InstrumentationLibrarySpans and
   InstrumentationLibraryMetrics messages. Delete deprecated
   instrumentation_library_logs, instrumentation_library_spans and
@@ -108,7 +185,7 @@ Full list of differences found in [this compare](https://github.com/open-telemet
 
 * Remove unused deprecated message StringKeyValue (#358)
 * Remove experimental metrics config service (#359)
- 
+
 ## 0.12.0 - 2022-01-19
 
 Full list of differences found in [this compare](https://github.com/open-telemetry/opentelemetry-proto/compare/v0.11.0...v0.12.0).
@@ -259,9 +336,9 @@ Full list of differences found in [this compare.](https://github.com/open-teleme
 ### Changed
 
 * :stop_sign: [BREAKING] Metrics - protocol was refactored, and lots of breaking changes.
-** Removed MetricDescriptor and embedded into Metric and the new data types.
-** Add new data types Gauge/Sum/Histogram.
-** Make use of the "AggregationTemporality" into the data types that allow that support.
+  * Removed MetricDescriptor and embedded into Metric and the new data types.
+  * Add new data types Gauge/Sum/Histogram.
+  * Make use of the "AggregationTemporality" into the data types that allow that support.
 * Rename enum values to follow the proto3 style guide.
 
 ### Added
