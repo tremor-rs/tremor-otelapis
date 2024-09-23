@@ -3,7 +3,7 @@ authors = ["The Tremor Team"]
 categories = ["api-bindings"]
 description = "OpenTelemetry v1 API binding based on tonic/prost."
 documentation = "https://github.com/tremor-rs/otelapis"
-edition = "2018"
+edition = "2021"
 exclude = ["*.sh"]
 keywords = ["opentelemetry", "api", "grpc", "protobuf", "tremor"]
 license = "Apache-2.0"
@@ -17,6 +17,14 @@ doctest = false
 
 [package.metadata.docs.rs]
 all-features = true
+
+[dependencies]
+prost = { version = "0.13" }
+tokio = { version = "1.40.0", features = ["sync"], optional = true }
+tonic = { version = "0.12", features = ["gzip", "tls", "tls-webpki-roots"] }
+
+[build-dependencies]
+tonic-build = { version = "0.12" }
 
 [features]
 
@@ -80,10 +88,4 @@ otel-trace = [
     "opentelemetry-proto-collector-trace-v1",
 ]
 
-[dependencies]
-prost = { version = "0.11" }
-tonic = { version = "0.8.2", features = [ "gzip", "tls", "tls-webpki-roots" ] }
-async-channel = "1"
-
-[build-dependencies]
-tonic-build = { version = "0.8.2" }
+channels = ["dep:tokio"]

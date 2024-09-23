@@ -14,14 +14,11 @@
 
 // We allow the generated code to use a less strict coding still
 // than hand maintained code.
-#[cfg_attr(
-    feature = "cargo-clippy",
-    allow(
-        clippy::all,
-        clippy::unwrap_used,
-        clippy::unnecessary_unwrap,
-        clippy::pedantic,
-    )
+#[allow(
+    clippy::all,
+    clippy::unwrap_used,
+    clippy::unnecessary_unwrap,
+    clippy::pedantic
 )]
 #[allow(missing_docs)]
 
