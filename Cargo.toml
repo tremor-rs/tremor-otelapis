@@ -1,5 +1,5 @@
 [package]
-categories = ["api-bindings", "otel"]
+categories = ["api-bindings"]
 description = "OpenTelemetry v1 API binding based on tonic/prost."
 documentation = "https://github.com/tremor-rs/otelapis"
 edition = "2021"
