@@ -95,6 +95,7 @@
 //!
 //!     Ok(())
 //! }
+//! ```
 //!
 //! [`otelapis`]: https://github.com/open-telemetry/opentelemetry-specification
 //! [`tonic-build`]: https://github.com/hyperium/tonic/tree/master/tonic-build
